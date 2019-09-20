@@ -1,5 +1,5 @@
-# Mindboggle to dataset
-Tool for converting mindboggle niftii files into ready to use 2d/3d datasets.
+# Niftii to dataset
+Tool for converting labeled niftii files into ready to use 2d/3d datasets.
 
 ## Installation
 
@@ -11,7 +11,7 @@ conda activate datasets
 
 ## Usage
 
-1. Put somewhere on your mindboggle niftii collection files.
+1. Put somewhere on your computer niftii collection files.
 2. Create `config.py` with setup.
 3. Run `python extract.py`
 
@@ -24,7 +24,7 @@ Detailed explanation on `config.brain.py` example:
 ```python
 # Dataset common setup
 dataset = {
-    # Input directory with niftii collections from mindboggle
+    # Input directory with niftii collections from niftii
     'niftii_dir': '/home/filip/Projekty/ML/datasets/niftii',
     
     # Filename for labeled niftii file
@@ -62,7 +62,7 @@ dataset = {
 }
 
 scans = [
-    # Directory names with some of mindboggle collection files
+    # Directory names with some of niftii collection files
     'Afterthought-1',
     'MMRR-3T7T-2-1',
     'MMRR-3T7T-2-2',
