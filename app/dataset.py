@@ -20,6 +20,7 @@ class MyDataset():
             labels = [255.0],
             only_masks = True,
             invert = False,
+            split = True,
             scans = [],
         ):
         self.niftii_dir = niftii_dir
@@ -32,6 +33,7 @@ class MyDataset():
         self.labels = labels
         self.only_masks = only_masks
         self.invert = invert
+        self.split = split
         self.scans = scans
 
         self.collection_dir = os.path.join(dataset_dir, collection_name)
@@ -67,7 +69,8 @@ class MyDataset():
             else:
                 self.save_dataset(X_data, y_data, scan_name)
 
-        self.split_dataset()
+        if self.split:
+            self.split_dataset()
 
     """ Saves datasets by splitting files into images and labels
         As an option can ommit empty mask files

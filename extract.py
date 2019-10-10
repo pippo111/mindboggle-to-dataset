@@ -13,6 +13,7 @@ my_dataset = MyDataset(
   labels = cfg.dataset['labels'],
   only_masks=cfg.dataset['only_masks'],
   invert=cfg.dataset['invert'],
+  split=cfg.dataset['split'],
   scans = cfg.scans
 )
 my_dataset.create_dataset()
