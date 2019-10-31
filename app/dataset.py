@@ -128,14 +128,13 @@ class MyDataset():
         y_files = glob.glob(os.path.join(self.collection_dir, 'labels', '*.???'))
 
         X_train, X_valid, y_train, y_valid = train_test_split(X_files, y_files, test_size=0.2, random_state=1)
-        X_valid, X_test, y_valid, y_test = train_test_split(X_valid, y_valid, test_size=0.25, random_state=1)
 
         files = {
-            'images': { 'train': X_train, 'valid': X_valid, 'test': X_test },
-            'labels': { 'train': y_train, 'valid': y_valid, 'test': y_test }
+            'images': { 'train': X_train, 'valid': X_valid },
+            'labels': { 'train': y_train, 'valid': y_valid }
         }
 
-        for dataset in ('train', 'valid', 'test'):
+        for dataset in ('train', 'valid'):
             for types in ('images', 'labels'):
                 types_dir = os.path.join(self.collection_dir, dataset, types)
                 os.makedirs(types_dir)

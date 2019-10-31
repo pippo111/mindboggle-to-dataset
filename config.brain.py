@@ -16,6 +16,7 @@ dataset = {
     'input_shape': (192, 256, 1),
     'labels': [0.0],
     'only_masks': True,
+    'split': True,
     'invert': True
 }
 
