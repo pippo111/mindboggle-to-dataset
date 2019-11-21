@@ -11,9 +11,7 @@ my_dataset = MyDataset(
   scan_shape = cfg.dataset['scan_shape'],
   input_shape = cfg.dataset['input_shape'],
   labels = cfg.dataset['labels'],
-  only_masks=cfg.dataset['only_masks'],
   invert=cfg.dataset['invert'],
-  split=cfg.dataset['split'],
   scans = cfg.scans
 )
 my_dataset.create_dataset()

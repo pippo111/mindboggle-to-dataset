@@ -23,6 +23,21 @@ def labels_to_mask(data: np.ndarray, labels: list, invert: bool = False) -> np.n
 
     return mask
 
+""" Swap axes to be compatible with desired shape
+"""
+def swap_axes(data: np.ndarray, new_shape: tuple) -> np.ndarray:
+    old_shape = data.shape
+
+    arr_in = np.asarray(old_shape)
+    arr_out = np.asarray(new_shape)
+
+    min_in = np.argmin(arr_in)
+    min_out = np.argmin(arr_out)
+
+    swapped_data = np.moveaxis(data, min_in, min_out)
+
+    return swapped_data
+
 """ Resizes image to desired shape 2d/3d
 """
 def resize(data: np.ndarray, new_shape: tuple) -> np.ndarray:

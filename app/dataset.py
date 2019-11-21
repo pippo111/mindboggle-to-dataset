@@ -5,7 +5,9 @@ import glob
 from PIL import Image
 from sklearn.model_selection import train_test_split
 
-from utils.image import slice_image, norm_to_uint8, niftii_to_images, labels_to_mask, resize
+from inn_pipeline.dataset import NiftiDataset
+from inn_pipeline.utils.volume_ops import resize_volume
+from utils.image import slice_image, norm_to_uint8, niftii_to_images, labels_to_mask, resize, swap_axes
 
 class MyDataset():
     def __init__(
@@ -18,9 +20,7 @@ class MyDataset():
             scan_shape = (192, 256, 256),
             input_shape = (48, 64, 64),
             labels = [255.0],
-            only_masks = True,
             invert = False,
-            split = True,
             scans = [],
         ):
         self.niftii_dir = niftii_dir
@@ -31,9 +31,7 @@ class MyDataset():
         self.scan_shape = scan_shape
         self.input_shape = input_shape
         self.labels = labels
-        self.only_masks = only_masks
         self.invert = invert
-        self.split = split
         self.scans = scans
 
         self.collection_dir = os.path.join(dataset_dir, collection_name)
@@ -52,33 +50,23 @@ class MyDataset():
             shutil.rmtree(self.collection_dir)
         os.makedirs(self.collection_dir)
 
-        to_slice = self.scan_shape != self.input_shape
+        for group in ['train', 'valid', 'test']:
+            for scan_name in self.scans[group]:
+                full_path = os.path.join(self.niftii_dir, scan_name)
+                X_data, y_data = self.prepare_images_labels(full_path)
 
-        for scan_name in self.scans:
-            full_path = os.path.join(self.niftii_dir, scan_name)
-            X_data, y_data = self.prepare_images_labels(scan_name, full_path)
+                zero_mask = 0
 
-            # We are able to chose if scan image should be sliced
-            if to_slice:
-                sliced_images = slice_image(X_data, self.input_shape)
-                sliced_labels = slice_image(y_data, self.input_shape)
+                for i, (X, y) in enumerate(zip(X_data, y_data)):
+                    if y.max() > 0.0 or group == 'test':
+                        self.save_by_type(X, f'{scan_name}_{i:03d}', f'{group}/images')
+                        self.save_by_type(y, f'{scan_name}_{i:03d}', f'{group}/labels')
+                    else:
+                        if zero_mask % 10 == 0:
+                            self.save_by_type(X, f'{scan_name}_{i:03d}', f'{group}/images')
+                            self.save_by_type(y, f'{scan_name}_{i:03d}', f'{group}/labels')
+                        zero_mask += 1
 
-                for i, labels in enumerate(sliced_labels):
-                    self.save_dataset(sliced_images[i], labels, f'{scan_name}_{i:03d}')
-
-            else:
-                self.save_dataset(X_data, y_data, scan_name)
-
-        if self.split:
-            self.split_dataset()
-
-    """ Saves datasets by splitting files into images and labels
-        As an option can ommit empty mask files
-    """
-    def save_dataset(self, X, y, scan_name):
-        if y.max() > 0.0 or not self.only_masks:
-            self.save_by_type(X, scan_name, 'images')
-            self.save_by_type(y, scan_name, 'labels')
 
     """ Saves image / labels files
     """
@@ -102,44 +90,18 @@ class MyDataset():
         print('Done.')
 
     """ Returns images and labels with requested format
-        Images and labels are resized to desired standard size
+        Images and labels are resized to desired standard size with shape
+        adjusted to requested size
         Labels are also binarized based on labels
     """
-    def prepare_images_labels(self, scan_name, path) -> (np.ndarray, np.ndarray):
+    def prepare_images_labels(self, path) -> (np.ndarray, np.ndarray):
         print(f'Loading from {path}/{self.niftii_labels}')
-        label_data = niftii_to_images(self.niftii_labels, path)
-        prepared_labels = labels_to_mask(label_data, self.labels, invert=self.invert)
-        prepared_labels = resize(prepared_labels, self.scan_shape)
+        prepared_labels = NiftiDataset(os.path.join(path, self.niftii_labels), grayscale_conversion = False).coronal_view
+        prepared_labels = labels_to_mask(prepared_labels, self.labels, invert=self.invert)
+        prepared_labels = resize_volume(prepared_labels, self.scan_shape, bspline_order=0)
 
         print(f'Loading from {path}/{self.niftii_images}...')
-        image_data = niftii_to_images(self.niftii_images, path)
-        prepared_images = resize(image_data, self.scan_shape)
+        prepared_images = NiftiDataset(os.path.join(path, self.niftii_images), grayscale_conversion = True).coronal_view
+        prepared_images = resize_volume(prepared_images, self.scan_shape)
 
         return prepared_images, prepared_labels
-
-    """ Splits files into separate datasets for training, validation and tests
-        Files are grabbed from processed directory and moved into
-        train / valid / test directory.
-
-        Old structure is then removed.
-    """
-    def split_dataset(self):
-        X_files = glob.glob(os.path.join(self.collection_dir, 'images', '*.???'))
-        y_files = glob.glob(os.path.join(self.collection_dir, 'labels', '*.???'))
-
-        X_train, X_valid, y_train, y_valid = train_test_split(X_files, y_files, test_size=0.2, random_state=1)
-
-        files = {
-            'images': { 'train': X_train, 'valid': X_valid },
-            'labels': { 'train': y_train, 'valid': y_valid }
-        }
-
-        for dataset in ('train', 'valid'):
-            for types in ('images', 'labels'):
-                types_dir = os.path.join(self.collection_dir, dataset, types)
-                os.makedirs(types_dir)
-                for images in files[types][dataset]:
-                    shutil.move(images, os.path.join(self.collection_dir, dataset, types))
-
-        shutil.rmtree(os.path.join(self.collection_dir, 'images'))
-        shutil.rmtree(os.path.join(self.collection_dir, 'labels'))
