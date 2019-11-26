@@ -72,3 +72,28 @@ def norm_to_uint8(data: np.ndarray) -> np.ndarray:
     data = 255 * data
     img = data.astype(np.uint8)
     return img
+
+""" Returns index on first structure (mask, label) occurs
+"""
+def get_mask_start(data: np.ndarray, offset: int=0):
+    mask_start = 0
+
+    for i, y in enumerate(data):
+        if y.max() > 0.0:
+            mask_start = i
+            break
+
+    return max(0, mask_start - offset)
+
+""" Returns index on last structure (mask, label) occurs
+"""
+def get_mask_end(data: np.ndarray, offset: int=0):
+    data_len = len(data)
+    mask_end = data_len
+
+    for i, y in reversed(list(enumerate(data))):
+        if y.max() > 0.0:
+            mask_end = i
+            break
+
+    return min(data_len, mask_end + offset)
