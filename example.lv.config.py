@@ -1,9 +1,7 @@
 #
-# Example config file for creating brain mask from mindboggle datasets
-# We are choosing every labeled structure by selecting background 
-# and inverting it.
-# Crated datasets will be saved as 2d png slices by axis=2
-# 
+# Example config file for creating l/r lateral ventricles mask
+# from mindboggle datasets
+#
 
 # Dataset common setup
 dataset = {
@@ -13,7 +11,7 @@ dataset = {
     'dataset_dir': '/home/filip/Projekty/ML/datasets/processed',
     'collection_name': 'mindboggle_84_coronal_176x256_lateral_ventricle_inn',
     'scan_shape': (256, 256, 176),
-    'input_shape': (256, 256, 1),
+    'view': 'coronal',
     'labels': [4.0, 43.0],
     'invert': False
 }
