@@ -1,5 +1,6 @@
 # Custom config file
 /config.py
+/config.json
 
 # IDE config files
 /.vscode/*

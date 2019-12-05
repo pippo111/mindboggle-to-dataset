@@ -1,17 +1,23 @@
-import config as cfg
+import json
 
 from app.dataset import MyDataset
 
+with open('config.json', 'r') as cfg_file:
+    config = json.load(cfg_file)
+
+dataset = config['dataset']
+scans = config['scans']
+
 my_dataset = MyDataset(
-    niftii_dir=cfg.dataset['niftii_dir'],
-    niftii_labels=cfg.dataset['niftii_labels'],
-    niftii_images=cfg.dataset['niftii_images'],
-    dataset_dir=cfg.dataset['dataset_dir'],
-    collection_name=cfg.dataset['collection_name'],
-    scan_shape=cfg.dataset['scan_shape'],
-    view=cfg.dataset['view'],
-    labels=cfg.dataset['labels'],
-    invert=cfg.dataset['invert'],
-    scans=cfg.scans
+    niftii_dir=dataset['niftii_dir'],
+    niftii_labels=dataset['niftii_labels'],
+    niftii_images=dataset['niftii_images'],
+    dataset_dir=dataset['dataset_dir'],
+    collection_name=dataset['collection_name'],
+    scan_shape=tuple(dataset['scan_shape']),
+    view=dataset['view'],
+    labels=dataset['labels'],
+    invert=dataset['invert'],
+    scans=scans
 )
 my_dataset.create_dataset()
