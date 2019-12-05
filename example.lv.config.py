@@ -9,7 +9,7 @@ dataset = {
     'niftii_labels': 'aseg-in-t1weighted.nii.gz',
     'niftii_images': 't1weighted.nii.gz',
     'dataset_dir': '/home/filip/Projekty/ML/datasets/processed',
-    'collection_name': 'mindboggle_84_coronal_176x256_lateral_ventricle_inn',
+    'collection_name': 'lateral_ventricles_coronal_mindboggle_176x256_inn',
     'scan_shape': (256, 256, 176),
     'view': 'coronal',
     'labels': [4.0, 43.0],
