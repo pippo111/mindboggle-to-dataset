@@ -9,6 +9,7 @@ dataset = config['dataset']
 scans = config['scans']
 
 my_dataset = MyDataset(
+    collection_source=dataset['collection_source'],
     niftii_dir=dataset['niftii_dir'],
     niftii_labels=dataset['niftii_labels'],
     niftii_images=dataset['niftii_images'],
@@ -20,4 +21,6 @@ my_dataset = MyDataset(
     invert=dataset['invert'],
     scans=scans
 )
+
 my_dataset.create_dataset()
+my_dataset.create_summary()

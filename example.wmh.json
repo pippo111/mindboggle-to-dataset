@@ -1,5 +1,6 @@
 {
     "dataset": {
+        "collection_source": "wmh_challenge",
         "niftii_dir": "/home/filip/Projekty/ML/datasets/niftii/wmh",
         "niftii_labels": "wmh.nii.gz",
         "niftii_images": "orig/T1.nii.gz",

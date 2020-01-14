@@ -3,19 +3,22 @@ import shutil
 import numpy as np
 import glob
 from PIL import Image
+import csv
 
 from inn_pipeline.dataset import NiftiDataset
 from inn_pipeline.utils.volume_ops import resize_volume
 from utils.image import norm_to_uint8, labels_to_mask, get_mask_start, get_mask_end
+from utils.fs import calc_scan_hash
 
 
 class MyDataset():
     def __init__(
         self,
+        collection_source='mindboggle',
         niftii_dir='~/datasets/niftii',
-        niftii_labels='aseg-in-t1weighted_2std.nii.gz',
-        niftii_images='t1weighted_2std.nii.gz',
-        dataset_dir='t1weighted_2std.nii.gz',
+        niftii_labels='aseg-in-t1weighted.nii.gz',
+        niftii_images='t1weighted.nii.gz',
+        dataset_dir='t1weighted.nii.gz',
         collection_name='mindboggle',
         scan_shape=(192, 256, 256),
         view='coronal',
@@ -23,6 +26,7 @@ class MyDataset():
         invert=False,
         scans=[],
     ):
+        self.collection_source = collection_source
         self.niftii_dir = niftii_dir
         self.niftii_labels = niftii_labels
         self.niftii_images = niftii_images
@@ -77,6 +81,44 @@ class MyDataset():
                                 y, f'{scan_name}_{i:03d}', f'{group}/labels')
                 print('done.')
                 print('----------------------------------------')
+
+    """ Public API
+        Create summary as csv file, one for training dataset second for validation
+    """
+
+    def create_summary(self):
+        if not os.path.exists(self.collection_dir):
+            raise Exception(
+                'No data to process. Make sure processed dataset directory exists.')
+
+        fieldnames = ['collection_source', 'scan_name',
+                      'images_source', 'labels_source', 'view', 'shape', 'hash']
+
+        print(f'Creating csv summary...')
+
+        for group in ['train', 'valid']:
+            with open(os.path.join(self.collection_dir, f'{group}.csv'), 'w', newline='') as csvfile:
+
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+
+                for scan_name in self.scans[group]:
+                    niftii_images = os.path.join(
+                        self.niftii_dir, scan_name, self.niftii_images)
+                    niftii_labels = os.path.join(
+                        self.niftii_dir, scan_name, self.niftii_labels)
+
+                    writer.writerow({
+                        'collection_source': self.collection_source,
+                        'scan_name': scan_name,
+                        'images_source': self.niftii_images,
+                        'labels_source': self.niftii_labels,
+                        'view': self.view,
+                        'shape': f'{self.scan_shape[2]}x{self.scan_shape[1]}',
+                        'hash': calc_scan_hash(niftii_images, niftii_labels)
+                    })
+
+        print(f'Summary saved as train.csv and valid.csv.')
 
     """ Saves image / labels files
     """

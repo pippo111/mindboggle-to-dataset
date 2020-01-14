@@ -5,6 +5,7 @@
 
 # Dataset common setup
 dataset = {
+    "collection_source": "mindboggle",
     'niftii_dir': '/home/filip/Projekty/ML/datasets/niftii/mindboggle',
     'niftii_labels': 'aseg-in-t1weighted.nii.gz',
     'niftii_images': 't1weighted.nii.gz',
