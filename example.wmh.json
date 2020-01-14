@@ -2,13 +2,13 @@
     "dataset": {
         "niftii_dir": "/home/filip/Projekty/ML/datasets/niftii/wmh",
         "niftii_labels": "wmh.nii.gz",
-        "niftii_images": "pre/FLAIR.nii.gz",
+        "niftii_images": "orig/T1.nii.gz",
         "dataset_dir": "/home/filip/Projekty/ML/datasets/processed",
-        "collection_name": "wmh_axial_256x256_inn",
+        "collection_name": "wmh_axial_176x256_inn_orig_t1",
         "scan_shape": [
+            176,
             256,
-            256,
-            176
+            256
         ],
         "view": "axial",
         "labels": [
